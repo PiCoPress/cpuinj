@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [[ $1 -eq "" || $2 -eq "" ]]; then
+	echo -e " rand_cpu_inj [FILESIZE] [MEMSIZE] [PARAM]...\n"\
+	"create a random image and execute with qemu"\
+	"\n\n\t"\
+	"Filesize N:\t N * 512 bytes"\
+	"\n\t"\
+	"Memory size S:\tS megabyte"\
+	"\n\t"\
+	"Parameters:\tadditional params provided to qemu"\
+	"\n\n"\
+	"\$RFILE: destination of random image"
+	exit 0
+fi
+
+if [[ $RFILE -eq "" ]]; then
+	RFILE="./rand.img"
+fi
+truncate -s 510 $RFILE
+echo -e '\x55\xaa' >> $RFILE
+dd if=/dev/urandom of=$RFILE conv=notrunc bs=510 count=1 status=none && dd if=/dev/urandom of=$RFILE  seek=1 count=$1 status=none
+qemu-system-$(uname -p) -enable-kvm -m $2 $RFILE ${@:3}
