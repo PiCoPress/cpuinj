@@ -1,12 +1,12 @@
 #!/bin/bash
 
-if [[ $1 -eq "" || $2 -eq "" ]]; then
+if [[ -z "$1" || -z "$2" ]]; then
 	echo -e " rand_cpu_inj [FILESIZE] [MEMSIZE] [PARAM]...\n"\
 	"create a random image and execute with qemu"\
 	"\n\n\t"\
-	"Filesize N:\t N * 512 bytes"\
+	"Filesize N:\tN KB"\
 	"\n\t"\
-	"Memory size S:\tS megabyte"\
+	"Memory size:\tSupporting prefixes B, KB, MB, TB, PB, and EB. Default is MB."\
 	"\n\t"\
 	"Parameters:\tadditional params provided to qemu"\
 	"\n\n"\
@@ -14,10 +14,10 @@ if [[ $1 -eq "" || $2 -eq "" ]]; then
 	exit 0
 fi
 
-if [[ $RFILE -eq "" ]]; then
+if [[ -z $RFILE ]]; then
 	RFILE="./rand.img"
 fi
-truncate -s 510 $RFILE
-echo -e '\x55\xaa' >> $RFILE
-dd if=/dev/urandom of=$RFILE conv=notrunc bs=510 count=1 status=none && dd if=/dev/urandom of=$RFILE  seek=1 count=$1 status=none
-qemu-system-$(uname -p) -enable-kvm -m $2 $RFILE ${@:3}
+dd if=/dev/urandom of=$RFILE conv=notrunc bs=1024 status=none count=$1
+./src/mkbootsect $RFILE
+mv $RFILE.bin $RFILE
+./src/startqemu $2 $RFILE ${@:3}

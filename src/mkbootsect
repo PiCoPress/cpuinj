@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+	echo "Please specifiy file(s)."
+	exit 0
+fi
+BS_RECORD=$(echo -e "\x55\xaa")
+for n in ${@:1}
+do
+	if [ -f $n ]; then		
+		dd if=$n of=$n.bin bs=1 count=510 status=none
+		echo $BS_RECORD | dd of=$n.bin seek=510 bs=1 count=2 status=none
+		dd if=$n of=$n.bin seek=1 status=none conv=notrunc
+		echo "Created $n.bin."
+	else 
+		echo "File $n: not found."
+	fi
+done
