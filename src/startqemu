@@ -9,7 +9,7 @@ KVM_SUPPORT=""
 if [ -c /dev/kvm ]; then
 	KVM_SUPPORT="-enable-kvm"
 fi
-qemu-system-$(uname -p) -m $1 $2 ${@:3} $KVM_SUPPORT 2> /dev/null
+qemu-system-$(uname -m) -m $1 $2 ${@:3} $KVM_SUPPORT 2> /dev/null
 if [ $? -ne 0 ]; then
 	echo "KVM found but it is busy. Falling back to TCG..."
 	qemu-system-$(uname -m) -m $1 $2 ${@:3}
